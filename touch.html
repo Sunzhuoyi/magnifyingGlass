@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>基于canvas实现放大镜效果</title>
+    <style>
+        #big{
+            border: 1px solid #000;
+            display: none;
+        }
+        #select{
+            width: 90px;
+            height: 90px;
+            background-color: #cc3;
+            border: 1px solid #f00;
+            opacity: 0.5;
+            position: absolute;
+            z-index: 999;
+            display: none;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="small" width="350" height="500"></canvas>
+    <canvas id="big" width="300" height="300"></canvas>
+    <div id="select"></div>
+    <script>
+            var smallCanvas = document.getElementById('small'),
+                context =smallCanvas.getContext('2d'),
+                bigCanvas = document.getElementById('big'),
+                bigContext =bigCanvas.getContext('2d'),
+                square = document.getElementById('select'),
+                squaredata = {},
+                box = smallCanvas.getBoundingClientRect();
+                image = new Image();
+                image.src = 'one.jpeg';
+                image.onload = function () {
+                    context.drawImage(image,0,0,smallCanvas.width,smallCanvas.height);
+                };
+                function createSquare(x,y) {
+                    x = x - 45 < smallCanvas.offsetLeft ? smallCanvas.offsetLeft:x-45;
+                    y = y - 45 < smallCanvas.offsetTop ? smallCanvas.offsetTop:y-45;
+                    x = x + 90 < box.right ? x:box.right-90;
+                    y = y + 90 < box.bottom ? y:box.right-90;
+                    squaredata.left = x;
+                    squaredata.top = y;
+                    moveSquare(x,y);
+                }
+                function moveSquare(x,y) {
+                    square.style.left = x + "px";
+                    square.style.top = y + "px";
+                    showCanvas();
+                    showSquare();
+                }
+                function showSquare() {
+                    square.style.display ='block';
+                }
+                function hideSquare() {
+                    square.style.display = 'none';
+                }
+                function showCanvas() {
+                    bigCanvas.style.display = 'inline';
+                    copy()
+                }
+                function hideCanvas() {
+                    bigCanvas.style.display = 'none'
+                }
+                smallCanvas.onmouseover = function (e) {
+                    var x= e.clientX,
+                        y=e.clientY;
+                    createSquare(x,y);
+                };
+                window.onmousemove = function (e) {
+                    var x= e.clientX;
+                    y=e.clientY;
+                    if(x >= smallCanvas.offsetLeft && x <= smallCanvas.offsetLeft + smallCanvas.width && y >= smallCanvas.offsetTop && y <= smallCanvas.offsetTop + smallCanvas.height){
+                        createSquare(x,y);
+                    }else{
+                        hideSquare();
+                        hideCanvas();
+                    }
+                };
+                function copy() {
+                    bigContext.drawImage(
+                            smallCanvas,
+                            squaredata.left - box.left,
+                            squaredata.top - box.top,
+                            90,
+                            90,
+                            0,0,bigCanvas.width,bigCanvas.height
+                    )
+                }
+
+    </script>
+</body>
+</html>
